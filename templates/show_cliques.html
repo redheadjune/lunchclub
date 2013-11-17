@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block body %}
+
+	<div class="container theme-showcase">
+		<div class="jumbotron">
+			<h1>Cliques</h1>
+			<div class="chart"></div>
+		</div>
+
+		<div class="page-header">
+			<h1>Cliques</h1>
+		</div>
+		<p>
+			<ul class=cliques>
+			{% for clique_id, clique in cliques.iteritems() %}
+				<li>Clique : {{ clique_id }}</li>
+				<ul>
+				{% for member_id, member in clique['members'].iteritems() %}
+					<li> <a href='/members/{{ member['email'] }}'>{{ member['name'] }}</a></li>
+				{% endfor %}
+				</ul>
+			{% else %}
+				<li>No cliques.</li>
+			{% endfor %}
+			</ul>
+		</p>
+	</div>
+	<script language="javascript" type="text/javascript">
+		var BASE_URL = '/cliques'
+		var w = 960, h = 500;
+	</script>
+    <script language="javascript" type="text/javascript" src="{{ url_for('static', filename='js/clique-graph-labeled.js') }}"></script>
+{% endblock %}
