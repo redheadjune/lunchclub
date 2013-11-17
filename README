@@ -1,0 +1,11 @@
+Lunch Club
+==========
+
+A system for getting to know your teammates better.
+
+Setup
+-----
+
+	sqlite3 /tmp/lunchclub.db < schema.sql
+	python lunchclub.py
+		
