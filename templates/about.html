@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block body %}
+
+	<div class="container">
+		<div class="jumbotron">
+			<h2>About Lunch Club @ {{ config['org_name'] }}</h2>
+			<p>
+			As {{ config['org_name'] }} continues to grow it becomes harder and harder to know everyone on each team at all, let alone on a personal level. Lunch Club is a way to get to know and keep in touch with your fellow teammates in a structured and rewarding manner.
+			</p>
+			<h4><strong>How does it work?</strong></h4>
+			<p>
+			Every month all active members of Lunch Club will be assigned a clique of 1-4 other members. The goal is to go out with each member of your clique in turn over the course of the month (avg 1 lunch per week). Ideally by the end of each month all pairwise combinations of members in the clique will have gone to lunch together. <strong>As a reward for cliques that succeed in this goal {{ config['org_name'] }} will sponsor a lunch (up to $20/member) for the entire clique to go out together</strong>.
+			</p>
+			<a href='/members' type="button" class="btn btn-success">Sign me up!</a>
+			<br>
+			<h2>FAQ</h2>
+			<h4><strong>Can I go out with everyone at once?</strong></h4>
+			<p>
+			The goal of the program is to foster personal relationships between you and your coworkers. This is best achieved by having one-on-one time where you can really get to know the other person. You don't have to leave {{ config['org_name'] }}, but it would be best to grab a two person table if you choose to stay in to keep the experience personal.
+			</p>
+			<h4><strong>How do you verify lunches happened?</strong></h4>
+			<p>
+			You are on the honor system. Right now anyone can confirm a lunch with and for anyone else. Please only confirm lunches that you participated in. Remember, we play well with others :)
+			</p>
+			<h4><strong>How do we get the free lunch?</strong></h4>
+			<p>
+			One person in the clique pays for everything and can expense it. Make sure you note the expense as Lunch Club and note the other members of the clique. <strong>Make sure you only do this if you have a completed clique!</strong>
+			</p>
+			<h4><strong>How did you build this site?</strong></h4>
+			<p>
+			My hackathon project was to learn <a href="http://flask.pocoo.org/">flask</a>, <a href="http://d3js.org/">d3</a> and <a href="http://i.imgur.com/xVyoSl.jpg">some front end</a>. This is the result, and it is a work in progress. If you would like to see the code check out <a href="https://github.com/sc932/lunchclub">github.com/sc932/lunchclub</a>. Pull requests welcome!
+			</p>
+
+		</div>
+	</div>
+
+{% endblock %}

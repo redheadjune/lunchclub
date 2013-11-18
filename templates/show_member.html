@@ -1,49 +1,80 @@
 {% extends "layout.html" %}
 {% block body %}
 
-	<div class="container theme-showcase">
+	<div class="container">
 		<div class="jumbotron">
-			<h2>{{ member_dict['member'].name }}</h2>
-			<div class="chart"></div>
-		</div>
+			<div class="row">
+				<div class="col-md-6">
+					<h2>{{ member_dict['member'].name }}</h2>
+					<p>
+						<ul class=info>
+							<li>Join Date: {{ member_dict['member'].join_date }}</li>
+							<div class="btn-group">
+								{% if member_dict['member'].active %}
+									<button type="button" class="btn btn-xs btn-default">Active</button>
+									<button type="button" onclick="modify_member('/members/{{ member_dict['member'].email }}/deactivate', '{{ member_dict['member'].name }}', '{{ member_dict['member'].email }}')" class="btn btn-xs btn-danger">Deactivate</button>
+								{% else %}
+									<button type="button" class="btn btn-xs btn-warning">User inactive</button>
+									<button type="button" onclick="modify_member('/members/{{ member_dict['member'].email }}/activate', '{{ member_dict['member'].name }}', '{{ member_dict['member'].email }}')" class="btn btn-xs btn-success">activate</button>
+								{% endif %}
+							</div>
+							<li>Successful Lunch Clubs: {{ member_dict['member'].successes }}</li>
+						</ul>
+					</p>
+					<p>
+						<ul class=cliques>
+						{% for clique_id, clique in member_dict['cliques'].iteritems() %}
+							<li>Clique {{ clique_id }} : Completed {{ clique['completed'] }} of {{ clique['total'] }}</li>
+							<ul>
+							{% for member, member_info in clique['lunches'].iteritems() %}
+								<li>
+									<div class="btn-group">
+										<a href='/members/{{ member_info['alias'] }}' class="btn btn-default btn-xs">{{ member }}</a>
+										{% if not member_info['completed'] %}
+											<button type="button" onclick="modify_lunch('/lunch/add', {{ clique_id }}, '{{ member_dict['member'].email }}', {{ member_dict['member'].id }}, {{ member_info['id'] }} );" class="btn btn-xs btn-success">Add Completed Lunch</button>
+										{% else %}
+											<button type="button" onclick="modify_lunch('/lunch/remove', {{ clique_id }}, '{{ member_dict['member'].email }}', {{ member_dict['member'].id }}, {{ member_info['id'] }} );" class="btn btn-xs btn-danger">Remove Completed Lunch</button>
+										{% endif %}
+									</div>
+								</li>
+							{% endfor %}
+							</ul>
+						{% else %}
+							<li>No cliques.</li>
+						{% endfor %}
+						</ul>
+					</p>
+				</div>
 
-		<div class="page-header">
-			<h1>Info</h1>
+				<div class="col-md-6">
+					<div class="chart"></div>
+				</div>
+			</div>
 		</div>
-		<p>
-			<ul class=info>
-				<li>Join Date: {{ member_dict['member'].join_date }}</li>
-				<li>Successful Lunch Clubs: {{ member_dict['member'].successes }}</li>
-			</ul>
-		</p>
-		<p>
-			<ul class=cliques>
-			{% for clique_id, clique in member_dict['cliques'].iteritems() %}
-				<li>Clique {{ clique_id }} : Completed {{ clique['completed'] }} of {{ clique['total'] }}</li>
-				<ul>
-				{% for member, member_info in clique['lunches'].iteritems() %}
-					<li>
-						<div class="btn-group">
-							<a href='/members/{{ member_info['alias'] }}' class="btn btn-default btn-xs">{{ member }}</a>
-							{% if not member_info['completed'] %}
-								<button type="button" onclick="modify_lunch('/lunch/add', {{ clique_id }}, '{{ member_dict['member'].email }}', {{ member_dict['member'].id }}, {{ member_info['id'] }} );" class="btn btn-xs btn-success">Add Completed Lunch</button>
-							{% else %}
-								<button type="button" onclick="modify_lunch('/lunch/remove', {{ clique_id }}, '{{ member_dict['member'].email }}', {{ member_dict['member'].id }}, {{ member_info['id'] }} );" class="btn btn-xs btn-danger">Remove Completed Lunch</button>
-							{% endif %}
-						</div>
-					</li>
-				{% endfor %}
-				</ul>
-			{% else %}
-				<li>No cliques.</li>
-			{% endfor %}
-			</ul>
-		</p>
 
 	</div>
 	<script language="javascript" type="text/javascript">
 		var BASE_URL = '/members/{{member_dict['member'].email}}';
-		var w = 900, h = 300;
+		var w = 400, h = 300;
+
+		function modify_member(action, member_name, member_email) {
+			var form = document.createElement('form');
+			form.setAttribute('method', 'post');
+			form.setAttribute('action', action);
+			form.style.display = 'hidden';
+			var input = document.createElement("input");
+			input.setAttribute('type', 'hidden');
+			input.setAttribute('name', 'name');
+			input.setAttribute('value', member_name);
+			form.appendChild(input);
+			input = document.createElement("input");
+			input.setAttribute('type', 'hidden');
+			input.setAttribute('name', 'email');
+			input.setAttribute('value', member_email);
+			form.appendChild(input);
+			document.body.appendChild(form);
+			form.submit();
+		}
 
 		function modify_lunch(action, clique_id, member_email, member_one, member_two) {
 			var form = document.createElement('form');

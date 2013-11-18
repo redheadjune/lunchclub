@@ -1,33 +1,45 @@
 {% extends "layout.html" %}
 {% block body %}
 
-	<div class="container theme-showcase">
+	<div class="container">
 		<div class="jumbotron">
-			<h2>Add Member</h2>
-			<form action="{{ url_for('add_member') }}" method=post class=add-member>
-			  <div class="form-group">
-				<label for="name">Name</label>
-				<input type="text" class="form-control" name="name" placeholder="Enter name">
-			  </div>
-			  <div class="form-group">
-				<label for="alias">Email Alias</label>
-				<input type="text" class="form-control" name="alias" placeholder="Enter email alias">
-			  </div>
-			  <button type=submit class="btn btn-default" value=Share>Submit</button>
-			</form>	
+			<div class="row">
+				<div class="col-md-4">
+					<h2>Add Member</h2>
+					<form action="{{ url_for('add_member') }}" method=post role="form" class="form-horizontal">
+						<div class="form-group">
+							<label for="name" class="col-sm-2 control-label">Name</label>
+							<div class="col-sm-8">
+								<input type="text" class="form-control" name="name" placeholder="Name">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="name" class="col-sm-2 control-label">Alias</label>
+							<div class="col-sm-8">
+								<input type="text" class="form-control" name="alias" placeholder="alias">
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-offset-2 col-sm-10">
+								<button type=submit class="btn btn-default btn-success" value=Share>Submit</button>
+							</div>
+						</div>
+					</form>	
+				</div>
+				<div class="col-md-8">
+					<h2>Current Members</h2>
+					<p>
+						<ul>
+						{% for member in members %}
+							<li><a href='/members/{{ member.email }}'>{{ member.name }} ({{ member.email }})</a></li>
+						{% else %}
+							<li>No members.</li>
+						{% endfor %}
+						</ul>
+					</p>
+				</div>
+			</div>
 		</div>
 
-		<div class="page-header">
-			<h1>Members</h1>
-		</div>
-		<p>
-			<ul class=members>
-			{% for member in members %}
-				<li><a href='/members/{{ member.email }}'>{{ member.name }}</a></li>
-			{% else %}
-				<li>No members.</li>
-			{% endfor %}
-			</ul>
-		</p>
 	</div>
 {% endblock %}

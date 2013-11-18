@@ -1,5 +1,8 @@
 from collections import namedtuple
 
+LAYOUT_CONFIG = {
+	'org_name': "Yelp",
+	}
 CLIQUE_SIZE = 5
 SLOTS = {
 		'member': ['id', 'name', 'email', 'successes', 'misses', 'join_date', 'active'],

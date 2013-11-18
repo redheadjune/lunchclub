@@ -3,31 +3,50 @@
 
 	<div class="container theme-showcase">
 		<div class="jumbotron">
-			<h1>Cliques</h1>
-			<div class="chart"></div>
-		</div>
+			<div class="row">
+				<div class="col-md-8">
+					<h2>Active Cliques</h2>
+					<div class="chart"></div>
+				</div>
 
-		<div class="page-header">
-			<h1>Cliques</h1>
+				<div class="col-md-4">
+					<h2>Membership</h2>
+					<p>
+						<ul class=cliques>
+						{% for clique_id, clique in cliques.iteritems() %}
+							<div class="panel panel-primary">
+								<div class="panel-heading">
+									Clique : {{ clique_id }}
+								</div>
+								<div class="panel-body">
+									Start date: {{ clique['start_date'] }}
+									<br>
+									End date: {{ clique['end_date'] }}
+									<div class="btn-group-vertical">
+									{% for member_id, member in clique['members'].iteritems() %}
+										<a class="btn btn-default" href='/members/{{ member['email'] }}'>{{ member['name'] }} ({{ member.email }})</a>
+									{% endfor %}
+									</div>
+								</div>
+							</div>
+						{% else %}
+							<li>No cliques.</li>
+						{% endfor %}
+						</ul>
+					</p>
+					{% if admin %}
+						<a type="button" href="/cliques/make" class="btn btn-success">Make new cliques</a>
+					{% endif %}
+				</div>
+			</div>
 		</div>
-		<p>
-			<ul class=cliques>
-			{% for clique_id, clique in cliques.iteritems() %}
-				<li>Clique : {{ clique_id }}</li>
-				<ul>
-				{% for member_id, member in clique['members'].iteritems() %}
-					<li> <a href='/members/{{ member['email'] }}'>{{ member['name'] }}</a></li>
-				{% endfor %}
-				</ul>
-			{% else %}
-				<li>No cliques.</li>
-			{% endfor %}
-			</ul>
-		</p>
 	</div>
 	<script language="javascript" type="text/javascript">
 		var BASE_URL = '/cliques'
-		var w = 960, h = 500;
+		var w = 550, h = 0;
+		{% for clique in cliques %}
+			h += 200;
+		{% endfor %}
 	</script>
     <script language="javascript" type="text/javascript" src="{{ url_for('static', filename='js/clique-graph-labeled.js') }}"></script>
 {% endblock %}

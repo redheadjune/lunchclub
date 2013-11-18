@@ -7,7 +7,7 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from contextlib import closing
-from constant import SCHEMA_INFO, CLIQUE_SIZE, DEMO
+from constant import SCHEMA_INFO, CLIQUE_SIZE, DEMO, LAYOUT_CONFIG
 
 app = Flask(__name__)
 app.config.from_object('config.config_debug')
@@ -20,10 +20,14 @@ app.config.from_envvar('LUNCHCLUB_SETTINGS', silent=True)
 ### MEMBERS ###
 
 @app.route('/')
+@app.route('/about')
+def show_about():
+	return render_template('about.html', config=LAYOUT_CONFIG)
+
 @app.route('/members')
 def show_members():
 	members = get_all_members()
-	return render_template('show_members.html', members=members)
+	return render_template('show_members.html', members=members, config=LAYOUT_CONFIG)
 
 @app.route('/members/add', methods=['POST'])
 def add_member():
@@ -33,6 +37,28 @@ def add_member():
 			)
 	flash('New user added')
 	return redirect(url_for('show_members'))
+
+@app.route('/members/<member_email>/deactivate', methods=['POST'])
+def deactivate_member(member_email):
+	commit_member(
+			request.form['name'],
+			request.form['email'],
+			active=False,
+			new_member=False
+			)
+	flash('%s deactivated' % request.form['name'])
+	return redirect(url_for('show_member', member_email=member_email))
+
+@app.route('/members/<member_email>/activate', methods=['POST'])
+def activate_member(member_email):
+	commit_member(
+			request.form['name'],
+			request.form['email'],
+			active=True,
+			new_member=False
+			)
+	flash('%s activated' % request.form['name'])
+	return redirect(url_for('show_member', member_email=member_email))
 
 @app.route('/members/<member_email>/clique_data')
 def clique_member_data(member_email):
@@ -45,6 +71,11 @@ def clique_member_data(member_email):
 
 @app.route('/members/<member_email>')
 def show_member(member_email):
+	member_dict = get_member_dict(member_email)
+	return render_template('show_member.html', member_dict=member_dict, config=LAYOUT_CONFIG)
+
+def get_member_dict(member_email):
+	"""Return the member_dict given an email."""
 	member_info = get_member(member_email)
 	if not member_info:
 		flash('No such user')
@@ -104,8 +135,7 @@ def show_member(member_email):
 						'alias': lunch_members_by_id[member_to_add].email,
 						'id': lunch_members_by_id[member_to_add].id
 						}
-
-	return render_template('show_member.html', member_dict=member_dict)
+	return member_dict
 
 ### LUNCH ###
 
@@ -150,7 +180,7 @@ def demo_load():
 @app.route('/cliques')
 def show_cliques():
 	active_cliques = get_all_cliques()
-	return render_template('show_cliques.html', cliques=active_cliques)
+	return render_template('show_cliques.html', cliques=active_cliques, admin=False, config=LAYOUT_CONFIG)
 
 @app.route('/cliques/make')
 def make_cliques():
@@ -232,8 +262,16 @@ def get_all_cliques(force_active=True, require_member=None):
 
 	return active_cliques
 
+### ADMIN ###
+
+@app.route('/admin/cliques')
+def show_cliques_admin():
+	active_cliques = get_all_cliques()
+	return render_template('show_cliques.html', cliques=active_cliques, admin=True, config=LAYOUT_CONFIG)
+
+
 def clique_maker():
-	members = get_all_members()
+	members = get_all_members(only_active=True)
 	number_of_cliques = int(math.ceil(len(members)/float(CLIQUE_SIZE)))
 	start_date = datetime.date.today().toordinal()
 	end_date = start_date + 30 # One month later
@@ -368,19 +406,41 @@ def query_db_for_type(query, schema, args=(), one=False):
 			return None
 	return results
 
-def commit_member(name, email, successes=0, misses=0, join_date=datetime.date.today().toordinal(), active=True):
+def commit_member(name, email, successes=None, misses=None, join_date=None, active=None, new_member=True):
 	"""Add member to the db."""
 	db = get_db()
-	db.execute('insert into member (name, email, successes, misses, join_date, active) values (?, ?, ?, ?, ?, ?)',
-			[
-				name,
-				email,
-				successes,
-				misses,
-				join_date,
-				active,
-				]
-			)
+	if new_member:
+		# Set defaults for new members
+		if successes is None:
+			successes = 0
+		if misses is None:
+			misses = 0
+		if join_date is None:
+			join_date = datetime.date.today().toordinal()
+		if active is None:
+			active = True
+		db.execute('insert into member (name, email, successes, misses, join_date, active) values (?, ?, ?, ?, ?, ?)',
+				[
+					name,
+					email,
+					successes,
+					misses,
+					join_date,
+					active,
+					]
+				)
+	else:
+		cmd = 'update member set'
+		if successes is not None:
+			cmd += ' successes=%d' % successes
+		if misses is not None:
+			cmd += ' misses=%d' % misses
+		if join_date is not None:
+			cmd += ' join_date=%d' % join_date
+		if active is not None:
+			cmd += ' active=%d' % active
+		cmd += ' where name="%s" and email="%s"' % (name, email)
+		db.execute(cmd)
 	db.commit()
 
 def commit_lunch(clique_id, member_one_id, member_two_id, completed=1):
@@ -396,12 +456,18 @@ def commit_lunch(clique_id, member_one_id, member_two_id, completed=1):
 
 ### members ###
 
-def get_all_members():
+def get_all_members(only_active=False):
 	"""Return all member named_tuples from the db."""
-	members = query_db_for_type(
-			'select id, name, email, successes, misses, join_date, active from member order by join_date desc',
-			SCHEMA_INFO['member'],
-			)
+	if not only_active:
+		members = query_db_for_type(
+				'select id, name, email, successes, misses, join_date, active from member order by join_date desc',
+				SCHEMA_INFO['member'],
+				)
+	else:
+		members = query_db_for_type(
+				'select id, name, email, successes, misses, join_date, active from member where active=1 order by join_date desc',
+				SCHEMA_INFO['member'],
+				)
 	return members
 
 def get_member(member_email):

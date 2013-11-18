@@ -8,12 +8,10 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="../../docs-assets/ico/favicon.png">
 
-	<title>Lunch Club @ Yelp</title>
+	<title>Lunch Club @ {{ config['org_name'] }}</title>
 
 	<!-- Bootstrap core CSS -->
 	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.css') }}">
-	<!-- Bootstrap theme -->
-	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap-theme.min.css') }}">
 
 	<!-- D3 -->
 	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/d3.css') }}">
@@ -31,11 +29,10 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Lunch Club @ Yelp</a>
+		  <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-cutlery"></span> Lunch Club @ {{ config['org_name'] }}</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="/">Home</a></li>
             <li><a href="/about">About</a></li>
             <li><a href="/members">Members</a></li>
             <li><a href="/cliques">Cliques</a></li>
@@ -45,10 +42,21 @@
     </div>
 
 	{% for message in get_flashed_messages() %}
-		<div class=jumbotron>{{ message }}</div>
+		<div class="container">
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				{{ message }}
+			</div>
+		</div>
 	{% endfor %}
+
 	{% block body %}{% endblock %}
 
-  </body>
+	<footer class="footer">
+		<div class="container">
+			<p>&copy; Scott Clark 2013</p>
+		</div>
+	</footer>
 
+  </body>
 </html>
